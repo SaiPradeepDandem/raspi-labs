@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.pi4j</groupId>
+    <artifactId>raspi-labs</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <finalJarName>${project.build.finalName}-jar-with-dependencies.jar</finalJarName>
+        
+        <pi.host>host</pi.host>
+        <pi.user>user</pi.user>
+        <pi.password>pwd</pi.password>
+        <pi.publicKeyFile>${user.home}\.ssh\id_rsa</pi.publicKeyFile>
+        <pi.deployDirectory>/home/pi/eclipse-workspace/raspi-labs</pi.deployDirectory>
+    </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-core</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <!-- Create an executable jar with dependencies -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.pi4j.raspi.labs.Main</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> 
+                        <phase>package</phase> 
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin> 
+            
+            <!-- Copies the executable jar to the raspberry pi and executes the jar in -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>server-copy</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <tasks>
+                                <echo message="::> Copying the jar to raspberry pi" />
+                                <scp file="${project.build.directory}\${finalJarName}"
+                                     todir="${pi.user}@${pi.host}:${pi.deployDirectory}" 
+                                     passphrase="" trust="true" failonerror="true" verbose="true"  password="${pi.password}">
+                                </scp>
+                            
+                                <echo message="::> Running the jar" />
+                                <sshexec command="export DISPLAY=:0.0;sudo java -jar ${pi.deployDirectory}/${finalJarName} >/dev/null 2>&amp;1 &amp; echo $!" 
+                                         host="${pi.host}" username="${pi.user}" password="${pi.password}"
+                                         passphrase="" trust="true" failonerror="true"/>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant-jsch</artifactId>
+                        <version>1.9.6</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+    
+</project>
