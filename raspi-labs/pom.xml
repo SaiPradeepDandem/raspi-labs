@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.pi4j</groupId>
+    <groupId>com.raspi.labs</groupId>
     <artifactId>raspi-labs</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -11,9 +11,9 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <finalJarName>${project.build.finalName}-jar-with-dependencies.jar</finalJarName>
         
-        <pi.host>host</pi.host>
-        <pi.user>user</pi.user>
-        <pi.password>pwd</pi.password>
+        <pi.host></pi.host>
+        <pi.user></pi.user>
+        <pi.password></pi.password>
         <pi.publicKeyFile>${user.home}\.ssh\id_rsa</pi.publicKeyFile>
         <pi.deployDirectory>/home/pi/eclipse-workspace/raspi-labs</pi.deployDirectory>
     </properties>
@@ -23,6 +23,12 @@
             <groupId>com.pi4j</groupId>
             <artifactId>pi4j-core</artifactId>
             <version>1.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.twitter4j</groupId>
+            <artifactId>twitter4j-core</artifactId>
+            <version>[4.0,)</version>
         </dependency>
     </dependencies>
     
@@ -34,7 +40,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.pi4j.raspi.labs.Main</mainClass>
+                            <mainClass>com.raspi.labs.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -59,11 +65,11 @@
                 <version>1.8</version>
                 <executions>
                     <execution>
-                        <id>server-copy</id>
+                        <id>copy-to-raspi</id>
+                        <phase>deploy</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
-                        <phase>package</phase>
                         <configuration>
                             <tasks>
                                 <echo message="::> Copying the jar to raspberry pi" />
@@ -72,7 +78,7 @@
                                      passphrase="" trust="true" failonerror="true" verbose="true"  password="${pi.password}">
                                 </scp>
                             
-                                <echo message="::> Running the jar" />
+                                <echo message="::> Running the jar in raspberry pi" />
                                 <sshexec command="export DISPLAY=:0.0;sudo java -jar ${pi.deployDirectory}/${finalJarName} >/dev/null 2>&amp;1 &amp; echo $!" 
                                          host="${pi.host}" username="${pi.user}" password="${pi.password}"
                                          passphrase="" trust="true" failonerror="true"/>

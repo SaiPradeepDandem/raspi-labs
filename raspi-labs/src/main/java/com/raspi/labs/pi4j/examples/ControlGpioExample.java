@@ -1,4 +1,4 @@
-package com.pi4j.raspi.labs.examples;
+package com.raspi.labs.pi4j.examples;
 /*
  * #%L
  * **********************************************************************

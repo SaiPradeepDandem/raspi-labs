@@ -1,6 +1,6 @@
-package com.pi4j.raspi.labs;
+package com.raspi.labs;
 
-import com.pi4j.raspi.labs.examples.BlinkGpioExample;
+import com.raspi.labs.pi4j.examples.BlinkGpioExample;
 /**
  * Main class of the raspi-labs.
  *
